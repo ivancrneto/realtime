@@ -5,13 +5,31 @@
     <h2>Real time update example</h2>
 </div>
 
-<div class="row">
+<div class="row fill-80">
     <div class="span3">
-        Form here
-    </div>
+        <form>
+          <legend>Add a word</legend>
+          <div class="control-group">
+            <div class="controls">
+              <input type="text" id="input_text" placeholder="Text" style="width:233px">
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="controls">
+              <div class="input-prepend">
+                <span class="add-on">#</span>
+                <input type="text" id="inout_color" placeholder="Color">
+              </div>
+            </div>
+              <button type="submit" class="btn btn-success">Add</button>
+          </div>
+        </form>
+     </div>
 
-    <div class="span9">
-        Canvas here
+    <div class="span9 fill">
+        <div class="well fill">
+            <legend>Words</legend>
+        </div>
     </div>
 </div>
 {% endblock %}
