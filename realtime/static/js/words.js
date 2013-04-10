@@ -78,18 +78,19 @@
                 this.pos_y = pos_y;
             },
 
-            draw: function(remove) {
+            draw: function() {
                 var html = $.tmpl(this.template, this);
-                if (remove != undefined) {
-                    // nothing for now
-                }
-
                 var existing = $('#' + this.elem_id, $(realtime.words.canvas));
                 if(existing.length) {
                     existing.remove();
                 }
 
                 $(realtime.words.canvas).append(html);
+            },
+
+            remove: function() {
+                var html = $.tmpl(this.template, this);
+                $('#' + this.elem_id, $(realtime.words.canvas)).remove();
             },
 
             template: '<div style="' +
@@ -124,6 +125,20 @@
                     word.draw();
                 }
 
+                // check for words to delete
+                var data_ids = [];
+                for(var i in data) {
+                    data_ids.push(data[i].id);
+                }
+
+                for(var i in realtime.words.list) {
+                    // means the word was deleted by other user
+                    if($.inArray(realtime.words.list[i].id, data_ids) == -1) {
+                        realtime.words.list[i].remove();
+                        realtime.words.list.splice(i, 1);
+                    }
+                }
+
                 callback();
             }).
             complete(function(data) {
@@ -134,7 +149,7 @@
         add: function(word){
             var post_data = {};
             for(attr in word) {
-                if(word.hasOwnProperty(attr) && attr != 'id') {
+                if(word.hasOwnProperty(attr) && attr != 'id' && attr != 'elem_id') {
                     post_data[attr] = word[attr];
                 }
             }
@@ -188,7 +203,7 @@
 
         poll: {
             timer: null,
-            interval: 9,
+            interval: 3,
 
             run: function() {
                 this.stop();
