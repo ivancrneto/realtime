@@ -105,6 +105,9 @@
                 }
 
                 callback();
+            }).
+            complete(function(data) {
+                realtime.words.poll.run();
             });
         },
 
@@ -161,6 +164,24 @@
             error(function() {
                 alert('Error when deleting a word!');
             });
+        },
+
+        poll: {
+            timer: null,
+            interval: 3,
+
+            run: function() {
+                this.stop();
+                this.timer = setTimeout(function() {
+                    realtime.words.get(realtime.words.setup_drag);
+                }, this.interval * 1000);
+            },
+
+            stop: function() {
+                if(this.timer) {
+                    clearTimeout(this.timer);
+                }
+            }
         }
     }
 })();
