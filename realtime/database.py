@@ -36,4 +36,4 @@ class Word(Model):
 
     def to_json(self):
         return dict(text=self.text, color=self.color, version=self.version,
-            pos_x=self.pos_x, pos_y=self.pos_y)
+            pos_x=self.pos_x, pos_y=self.pos_y, id=self.id)

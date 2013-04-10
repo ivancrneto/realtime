@@ -11,7 +11,7 @@ def home():
 
 @mod.route('/words/add', methods=['POST'])
 def add_word():
-    word = Word(**request.form)
+    word = Word(**request.form.to_dict())
     db_session.add(word)
     db_session.commit()
     return jsonify(word=word.to_json())
