@@ -17,14 +17,34 @@
                 var color = $('#input_color', $(realtime.words.form)).val();
                 var x = Math.floor((Math.random()*realtime.words.max_x)+1);
                 var y = Math.floor((Math.random()*realtime.words.max_y)+1);
+                y = Math.min(y + 61, realtime.words.max_y); // header issue
                 var word = new realtime.words.word(0, text, color, 0, x, y);
 
                 realtime.words.add(word);
             });
         },
 
+        get_word_by_id: function(id) {
+            for(var i in realtime.words.list) {
+                if(realtime.words.list[i].id == id) {
+                    return realtime.words.list[i];
+                }
+            }
+        },
+
         setup_drag: function() {
-            $('[draggable]').draggable();
+            $('[draggable]').draggable({
+                stop: function(event, ui) {
+                    var id = event.target.id.split('_');
+                    id = parseInt(id[id.length - 1]);
+                    var word = realtime.words.get_word_by_id(id);
+
+                    word.pos_x = ui.position.left;
+                    word.pos_y = ui.position.top;
+
+                    realtime.words.update(word);
+                }
+            });
         },
 
         word: Class.extend({
@@ -33,7 +53,7 @@
                 this.text = text;
                 this.color = color;
                 this.version = version;
-                this.pos_x = pos_x + 61;
+                this.pos_x = pos_x;
                 this.pos_y = pos_y;
             },
 
@@ -43,8 +63,8 @@
 
             template: '<div style="' +
                     'background-color:#${color};' +
-                    'top:${pos_x}px;' +
-                    'left:${pos_y}px;' +
+                    'top:${pos_y}px;' +
+                    'left:${pos_x}px;' +
                     'display: inline-block;padding:2px 5px;' +
                     'position:absolute;" ' +
                     'class="word" ' +
@@ -78,15 +98,32 @@
                 }
             }
 
-            console.log(post_data);
             $.post('/words/add', post_data).
             success(function(data) {
                 if(data.sucess == true) {
-                    console.log('success');
+                    // nothing for now
                 }
             }).
             error(function() {
                 alert('Error when adding a new word!');
+            });
+        },
+
+        update: function(word) {
+            var post_data = {
+                'pos_x': word.pos_x,
+                'pos_y': word.pos_y,
+                'id': word.id
+            };
+
+            $.post('/words/update', post_data).
+            success(function(data) {
+                if(data.success == true) {
+                    // nothing for now
+                }
+            }).
+            error(function() {
+                alert('Error when updating a word!');
             });
         }
     }
