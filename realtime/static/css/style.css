@@ -15,3 +15,14 @@ html, body {
 #word_canvas {
     position: relative;
 }
+
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.word {
+    cursor: move;
+}

@@ -7,7 +7,7 @@
 
         init: function() {
             realtime.words.init_form();
-            realtime.words.get();
+            realtime.words.get(realtime.words.setup_drag);
         },
 
         init_form: function() {
@@ -21,6 +21,10 @@
 
                 realtime.words.add(word);
             });
+        },
+
+        setup_drag: function() {
+            $('[draggable]').draggable();
         },
 
         word: Class.extend({
@@ -43,13 +47,15 @@
                     'left:${pos_y}px;' +
                     'display: inline-block;padding:2px 5px;' +
                     'position:absolute;" ' +
+                    'class="word" ' +
+                    'draggable="true" ' +
                     'id="word_id_${id}" ' +
-                    'version="${version}" ><span>${text}</span></div>',
+                    'version="${version}" >${text}</div>',
         }),
 
         list: [],
 
-        get: function() {
+        get: function(callback) {
             $.get('/words/get').
             success(function(data) {
                 for(var i in data){
@@ -59,6 +65,8 @@
                     realtime.words.list.push(word);
                     word.draw();
                 }
+
+                callback();
             });
         },
 
