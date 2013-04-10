@@ -118,9 +118,12 @@
 
             $.post('/words/add', post_data).
             success(function(data) {
-                if(data.sucess == true) {
-                    // nothing for now
-                }
+                data = data.word;
+                var word = new realtime.words.word(data.id, data.text,
+                    data.color, data.version, data.pos_x, data.pos_y);
+                realtime.words.list.push(word);
+                word.draw();
+                realtime.words.setup_drag();
             }).
             error(function() {
                 alert('Error when adding a new word!');
@@ -152,7 +155,8 @@
 
             $.post('/words/delete', post_data).
             success(function(data) {
-                // nothing for now
+                data = data.word;
+                $('#word_id_' + data.id).remove();
             }).
             error(function() {
                 alert('Error when deleting a word!');
