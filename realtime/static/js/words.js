@@ -31,6 +31,8 @@
                     return realtime.words.list[i];
                 }
             }
+
+            return null;
         },
 
         extract_id: function(raw_id) {
@@ -68,6 +70,7 @@
         word: Class.extend({
             init: function(id, text, color, version, pos_x, pos_y) {
                 this.id = id;
+                this.elem_id = 'word_id_' + this.id;
                 this.text = text;
                 this.color = color;
                 this.version = version;
@@ -75,8 +78,18 @@
                 this.pos_y = pos_y;
             },
 
-            draw: function() {
-                $(realtime.words.canvas).append($.tmpl(this.template,this));
+            draw: function(remove) {
+                var html = $.tmpl(this.template, this);
+                if (remove != undefined) {
+                    // nothing for now
+                }
+
+                var existing = $('#' + this.elem_id, $(realtime.words.canvas));
+                if(existing.length) {
+                    existing.remove();
+                }
+
+                $(realtime.words.canvas).append(html);
             },
 
             template: '<div style="' +
@@ -87,7 +100,7 @@
                     'position:absolute;" ' +
                     'class="word" ' +
                     'draggable="true" ' +
-                    'id="word_id_${id}" ' +
+                    'id="${elem_id}" ' +
                     'version="${version}" >${text}</div>',
         }),
 
@@ -98,9 +111,16 @@
             success(function(data) {
                 for(var i in data){
                     var w = data[i];
-                    var word = new realtime.words.word(w.id, w.text,
-                        w.color, w.version, w.pos_x, w.pos_y);
-                    realtime.words.list.push(word);
+                    var word = realtime.words.get_word_by_id(w.id);
+                    if(word == null){
+                        word = new realtime.words.word(w.id, w.text,
+                            w.color, w.version, w.pos_x, w.pos_y);
+                        realtime.words.list.push(word);
+                    } else {
+                        word.version = w.version;
+                        word.pos_x = w.pos_x;
+                        word.pos_y = w.pos_y;
+                    }
                     word.draw();
                 }
 
@@ -168,7 +188,7 @@
 
         poll: {
             timer: null,
-            interval: 3,
+            interval: 9,
 
             run: function() {
                 this.stop();
