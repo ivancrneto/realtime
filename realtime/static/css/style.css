@@ -26,3 +26,12 @@ html, body {
 .word {
     cursor: move;
 }
+
+.trash {
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    background: url('../img/trash.png');
+    width: 48px;
+    height: 48px;
+}

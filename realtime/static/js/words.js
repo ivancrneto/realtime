@@ -2,12 +2,13 @@
     realtime.words = {
         form: '#word_form',
         canvas: '#word_canvas',
-        max_x: 700,
-        max_y: 600,
+        max_x: 650,
+        max_y: 550,
 
         init: function() {
             realtime.words.init_form();
             realtime.words.get(realtime.words.setup_drag);
+            realtime.words.setup_trash();
         },
 
         init_form: function() {
@@ -32,17 +33,34 @@
             }
         },
 
+        extract_id: function(raw_id) {
+            var id = raw_id.split('_');
+            return parseInt(id[id.length - 1]);
+        },
+
         setup_drag: function() {
             $('[draggable]').draggable({
                 stop: function(event, ui) {
-                    var id = event.target.id.split('_');
-                    id = parseInt(id[id.length - 1]);
+                    var id = realtime.words.extract_id(event.target.id);
                     var word = realtime.words.get_word_by_id(id);
 
                     word.pos_x = ui.position.left;
                     word.pos_y = ui.position.top;
 
                     realtime.words.update(word);
+                }
+            });
+        },
+
+        setup_trash: function() {
+            $('.trash').droppable({
+                accept: '[draggable]',
+                drop: function(event, ui) {
+                    var id = ui.draggable.attr('id');
+                    id = realtime.words.extract_id(id);
+                    var word = realtime.words.get_word_by_id(id);
+
+                    realtime.words.remove(word);
                 }
             });
         },
@@ -124,6 +142,20 @@
             }).
             error(function() {
                 alert('Error when updating a word!');
+            });
+        },
+
+        remove: function(word) {
+            var post_data = {
+                'id': word.id
+            };
+
+            $.post('/words/delete', post_data).
+            success(function(data) {
+                // nothing for now
+            }).
+            error(function() {
+                alert('Error when deleting a word!');
             });
         }
     }
