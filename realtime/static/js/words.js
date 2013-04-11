@@ -40,6 +40,17 @@
             return parseInt(id[id.length - 1]);
         },
 
+        get_versions: function() {
+            var versions = []
+            $('[id^="word_id"]').each(function() {
+                var id = realtime.words.extract_id(this.id);
+                var version = $(this).attr('version');
+                versions.push(id + '=' + version);
+            });
+
+            return versions;
+        },
+
         setup_drag: function() {
             $('[draggable]').draggable({
                 stop: function(event, ui) {
@@ -108,34 +119,30 @@
         list: [],
 
         get: function(callback) {
-            $.get('/words/get').
+            realtime.words.poll.stop();
+            $.get('/words/get', {versions: realtime.words.get_versions()}).
             success(function(data) {
                 for(var i in data){
                     var w = data[i];
                     var word = realtime.words.get_word_by_id(w.id);
-                    if(word == null){
-                        word = new realtime.words.word(w.id, w.text,
-                            w.color, w.version, w.pos_x, w.pos_y);
-                        realtime.words.list.push(word);
+                    if(w.version == -1) {
+                        for(var i in realtime.words.list) {
+                            if(realtime.words.list[i].id == w.id) {
+                                realtime.words.list[i].remove();
+                                realtime.words.list.splice(i, 1);
+                            }
+                        }
                     } else {
-                        word.version = w.version;
-                        word.pos_x = w.pos_x;
-                        word.pos_y = w.pos_y;
-                    }
+                        if(word == null){
+                            word = new realtime.words.word(w.id, w.text,
+                                w.color, w.version, w.pos_x, w.pos_y);
+                            realtime.words.list.push(word);
+                        } else {
+                            word.version = w.version;
+                            word.pos_x = w.pos_x;
+                            word.pos_y = w.pos_y;
+                        }
                     word.draw();
-                }
-
-                // check for words to delete
-                var data_ids = [];
-                for(var i in data) {
-                    data_ids.push(data[i].id);
-                }
-
-                for(var i in realtime.words.list) {
-                    // means the word was deleted by other user
-                    if($.inArray(realtime.words.list[i].id, data_ids) == -1) {
-                        realtime.words.list[i].remove();
-                        realtime.words.list.splice(i, 1);
                     }
                 }
 

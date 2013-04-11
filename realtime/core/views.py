@@ -23,6 +23,7 @@ def update_word():
         return jsonify(deleted=True)
     word.pos_x = int(request.form['pos_x'])
     word.pos_y = int(request.form['pos_y'])
+    word.version += 1
     db_session.commit()
     return jsonify(word=word.to_json())
 
@@ -35,6 +36,34 @@ def delete_word():
 
 @mod.route('/words/get', methods=['GET'])
 def get_words():
-    words = Word.query.all()
-    res = json.dumps([w.to_json() for w in words])
+    versions = request.args.getlist('versions[]')
+    if versions:
+        ids = map(lambda x: int(x.split('=')[0]), versions)
+        ids_versions = dict(map(tuple,
+            map(lambda x: map(int, x.split('=')), versions)))
+
+        words = {w.id: w for w in Word.query.all()}
+        if len(ids):
+            res_words = []
+            for id_, w in words.items():
+                if id_ not in ids_versions:
+                    # means it is a new word for that user
+                    res_words.append(w)
+                elif w.version > ids_versions[id_]:
+                    # for existing words, only send newer versions
+                    res_words.append(w)
+
+            # if a version that does not exist in database is sent, it
+            # means we have a deleted word
+            for id_, v in ids_versions.items():
+                if not id_ in words.keys():
+                    w = Word(version=v, text='deleted',
+                        color='000000', pos_x=0, pos_y=0)
+                    w.id = id_
+                    w.version = -1
+                    res_words.append(w)
+    else:
+        res_words = Word.query.all()
+
+    res = json.dumps([w.to_json() for w in res_words])
     return Response(res, mimetype='application/json')
