@@ -154,6 +154,7 @@
         },
 
         add: function(word){
+            realtime.words.poll.stop();
             var post_data = {};
             for(attr in word) {
                 if(word.hasOwnProperty(attr) && attr != 'id' && attr != 'elem_id') {
@@ -172,10 +173,14 @@
             }).
             error(function() {
                 alert('Error when adding a new word!');
+            }).
+            complete(function() {
+                realtime.words.poll.run();
             });
         },
 
         update: function(word) {
+            realtime.words.poll.stop();
             var post_data = {
                 'pos_x': word.pos_x,
                 'pos_y': word.pos_y,
@@ -190,10 +195,14 @@
             }).
             error(function() {
                 alert('Error when updating a word!');
+            }).
+            complete(function() {
+                realtime.words.poll.run();
             });
         },
 
         remove: function(word) {
+            realtime.words.poll.stop();
             var post_data = {
                 'id': word.id
             };
@@ -205,12 +214,15 @@
             }).
             error(function() {
                 alert('Error when deleting a word!');
+            }).
+            complete(function() {
+                realtime.words.poll.run();
             });
         },
 
         poll: {
             timer: null,
-            interval: 3,
+            interval: 0.5,
 
             run: function() {
                 this.stop();
